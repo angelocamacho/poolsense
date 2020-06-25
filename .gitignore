@@ -1,0 +1,10 @@
+
+build/
+
+dist/
+
+poolsense/__pycache__/
+
+poolsense.egg-info/
+
+test_ps/
