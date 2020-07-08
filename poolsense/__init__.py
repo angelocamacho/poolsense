@@ -5,17 +5,19 @@ from poolsense.exceptions import PoolSenseError
 class PoolSense:
     """Main Interface to the Poolsense Device"""
 
-    def __init__(self):
-        self._version = "0.0.5"
+    def __init__(self, email, password):
+        self._version = "0.0.7"
         self._url_login = 'https://api.poolsense.net/api/v1/users/login'
+        self._email = email
+        self._password = password
 
 
-    async def test_poolsense_credentials(self, session: ClientSession, username, password):
+    async def test_poolsense_credentials(self, session: ClientSession):
         """Function tests the credentials against the Poolsense Servers"""
         
         LOGIN_DATA = {
-            "email": username,
-            "password": password,
+            "email": self._email,
+            "password": self._password,
             "uuid": "26aab38027422a59",
             "registrationId": "c5tknccIS_I:APA91bF0LS4mAR2NETBJ9tNFYEbvUgileRovnuC1Y9-yTy2qDsW4_YHlDcapH7BnHWzxh74fPVJw0Y9KuM3sCVIWknSOlGu3WP0QNSFzfuhEwQ_yBujt9cSVak0eVUo_IfmFf6rtlng_"
         }
@@ -24,7 +26,6 @@ class PoolSense:
         resp = await session.post(self._url_login, json=LOGIN_DATA)
         if resp.status == 200:
             data = await resp.json(content_type=None)
-            print(data)
             if data["token"] is None:
                 return False
             else:
@@ -33,11 +34,11 @@ class PoolSense:
             return False
 
 
-    async def get_poolsense_data(self, session: ClientSession, username, password):
+    async def get_poolsense_data(self, session: ClientSession):
         """Function gets all the data for this user account from the Poolsense servers"""
         LOGIN_DATA = {
-            "email": username,
-            "password": password,
+            "email": self._email,
+            "password": self._password,
             "uuid": "26aab38027422a59",
             "registrationId": "c5tknccIS_I:APA91bF0LS4mAR2NETBJ9tNFYEbvUgileRovnuC1Y9-yTy2qDsW4_YHlDcapH7BnHWzxh74fPVJw0Y9KuM3sCVIWknSOlGu3WP0QNSFzfuhEwQ_yBujt9cSVak0eVUo_IfmFf6rtlng_"
         }
