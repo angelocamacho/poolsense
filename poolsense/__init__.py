@@ -5,14 +5,16 @@ from poolsense.exceptions import PoolSenseError
 class PoolSense:
     """Main Interface to the Poolsense Device"""
 
-    def __init__(self, email, password):
-        self._version = "0.0.7"
+    def __init__(self, session: ClientSession, email, password, deviceId):
+        self._version = "0.1.0"
         self._url_login = 'https://api.poolsense.net/api/v1/users/login'
         self._email = email
         self._password = password
+        self._session = session
+        self._deviceId = deviceId
 
 
-    async def test_poolsense_credentials(self, session: ClientSession):
+    async def test_poolsense_credentials(self):
         """Function tests the credentials against the Poolsense Servers"""
         
         LOGIN_DATA = {
@@ -23,7 +25,7 @@ class PoolSense:
         }
 
         # """Login to the system."""
-        resp = await session.post(self._url_login, json=LOGIN_DATA)
+        resp = await self._session.post(self._url_login, json=LOGIN_DATA)
         if resp.status == 200:
             data = await resp.json(content_type=None)
             if data["token"] is None:
@@ -34,7 +36,7 @@ class PoolSense:
             return False
 
 
-    async def get_poolsense_data(self, session: ClientSession):
+    async def get_poolsense_data(self):
         """Function gets all the data for this user account from the Poolsense servers"""
         LOGIN_DATA = {
             "email": self._email,
@@ -58,15 +60,17 @@ class PoolSense:
         }
 
         # """Login to the system."""
-        resp = await session.post(self._url_login, json=LOGIN_DATA)
+        resp = await self._session.post(self._url_login, json=LOGIN_DATA)
         if resp.status == 200:
             data = await resp.json(content_type=None)
 
             URL_DATA = 'https://api.poolsense.net/api/v1/sigfoxData/app/' + data['devices'][0]["serial"] + '/?tz=-120'
+            if self._deviceId:
+                URL_DATA = 'https://api.poolsense.net/api/v1/sigfoxData/app/' + self._deviceId + '/?tz=-120'
             head = {'Authorization': 'token {}'.format(data["token"])}
 
             #
-            resp = await session.get(URL_DATA, headers=head)
+            resp = await self._session.get(URL_DATA, headers=head)
             if resp.status == 200:
                 data = await resp.json(content_type=None)
                 
