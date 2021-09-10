@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="poolsense", # Replace with your own username
-    version="0.0.9",
+    version="0.1.0",
     author="Haemish Kyd",
     author_email="haemish.kyd@gmail.com",
     description="Asynchronous Python client for getting PoolSense data.",
