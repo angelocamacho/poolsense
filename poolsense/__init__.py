@@ -13,7 +13,6 @@ class PoolSense:
         self._session = session
         self._deviceId = deviceId
 
-
     async def test_poolsense_credentials(self):
         """Function tests the credentials against the Poolsense Servers"""
         
@@ -31,7 +30,9 @@ class PoolSense:
             if data["token"] is None:
                 return False
             else:
-                return True
+                if len(data["devices"]) > 0:
+                    return data["devices"][0]["serial"]
+                return "DEMO"
         else:
             return False
 
