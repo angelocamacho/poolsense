@@ -6,7 +6,7 @@ class PoolSense:
     """Main Interface to the Poolsense Device"""
 
     def __init__(self, session: ClientSession, email, password, deviceId):
-        self._version = "0.1.0"
+        self._version = "0.0.9"
         self._url_login = 'https://api.poolsense.net/api/v1/users/login'
         self._email = email
         self._password = password
