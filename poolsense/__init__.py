@@ -5,14 +5,15 @@ from poolsense.exceptions import PoolSenseError
 class PoolSense:
     """Main Interface to the Poolsense Device"""
 
-    def __init__(self, email, password):
-        self._version = "0.0.7"
+    def __init__(self, session: ClientSession, email, password, deviceId):
+        self._version = "0.1.0"
         self._url_login = 'https://api.poolsense.net/api/v1/users/login'
         self._email = email
         self._password = password
+        self._session = session
+        self._deviceId = deviceId
 
-
-    async def test_poolsense_credentials(self, session: ClientSession):
+    async def test_poolsense_credentials(self):
         """Function tests the credentials against the Poolsense Servers"""
         
         LOGIN_DATA = {
@@ -23,18 +24,20 @@ class PoolSense:
         }
 
         # """Login to the system."""
-        resp = await session.post(self._url_login, json=LOGIN_DATA)
+        resp = await self._session.post(self._url_login, json=LOGIN_DATA)
         if resp.status == 200:
             data = await resp.json(content_type=None)
             if data["token"] is None:
                 return False
             else:
-                return True
+                if len(data["devices"]) > 0:
+                    return data["devices"][0]["serial"]
+                return "DEMO"
         else:
             return False
 
 
-    async def get_poolsense_data(self, session: ClientSession):
+    async def get_poolsense_data(self):
         """Function gets all the data for this user account from the Poolsense servers"""
         LOGIN_DATA = {
             "email": self._email,
@@ -47,6 +50,9 @@ class PoolSense:
             "Chlorine": 0,
             "pH": 0,
             "Water Temp": 0,
+            "Chlorine Instant": 0,
+            "pH Instant": 0,
+            "Water Temp Instant": 0,
             "Battery": 0,
             "Last Seen": 0,
             "Chlorine High": 0,
@@ -58,15 +64,17 @@ class PoolSense:
         }
 
         # """Login to the system."""
-        resp = await session.post(self._url_login, json=LOGIN_DATA)
+        resp = await self._session.post(self._url_login, json=LOGIN_DATA)
         if resp.status == 200:
             data = await resp.json(content_type=None)
 
             URL_DATA = 'https://api.poolsense.net/api/v1/sigfoxData/app/' + data['devices'][0]["serial"] + '/?tz=-120'
+            if self._deviceId:
+                URL_DATA = 'https://api.poolsense.net/api/v1/sigfoxData/app/' + self._deviceId + '/?tz=-120'
             head = {'Authorization': 'token {}'.format(data["token"])}
 
             #
-            resp = await session.get(URL_DATA, headers=head)
+            resp = await self._session.get(URL_DATA, headers=head)
             if resp.status == 200:
                 data = await resp.json(content_type=None)
                 
@@ -74,6 +82,9 @@ class PoolSense:
                     "Chlorine": data["ORP"],
                     "pH": data["pH"],
                     "Water Temp": data["waterTemp"],
+                    "Chlorine Instant": data["lastData"]["ORP"],
+                    "pH Instant": data["lastData"]["pH"],
+                    "Water Temp Instant": data["lastData"]["waterTemp"],
                     "Battery": data["vBat"],
                     "Last Seen": data["lastData"]["time"],
                     "Chlorine High": data["display"]["orpNotificationMax"],
