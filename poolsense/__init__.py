@@ -79,12 +79,12 @@ class PoolSense:
                 data = await resp.json(content_type=None)
                 
                 results = {
-                    "Chlorine": data["ORP"],
-                    "pH": data["pH"],
-                    "Water Temp": data["waterTemp"],
-                    "Chlorine Instant": data["lastData"]["ORP"],
-                    "pH Instant": data["lastData"]["pH"],
-                    "Water Temp Instant": data["lastData"]["waterTemp"],
+                    "Chlorine": data["monthData"]["orp"][0],
+                    "pH": data["monthData"]["ph"][0],
+                    "Water Temp": data["monthData"]["temp"][0],
+                    "Chlorine Instant": data["monthData"]["orp"][0],
+                    "pH Instant": data["monthData"]["ph"][0],
+                    "Water Temp Instant": data["monthData"]["temp"][0],
                     "Battery": data["vBat"],
                     "Last Seen": data["lastData"]["time"],
                     "Chlorine High": data["display"]["orpNotificationMax"],
